@@ -1,0 +1,13 @@
+node_modules
+
+**/.idea/workspace.xml
+**/.idea/dictionaries
+
+.elasticbeanstalk/
+
+coverage
+
+templates/**/*.html
+
+**/*.log*
+**/*.swp

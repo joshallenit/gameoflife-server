@@ -1,0 +1,23 @@
+{
+  "name": "GameOfLife",
+  "version": "1.0.0",
+  "description": "TDD Demo featuring Conway's Game of Life",
+  "main": "lib/index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": " mocha --require mocha-clean test/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:joshallenit/lunchandlearntesting.git"
+  },
+  "homepage": "https://github.com/joshallenit/lunchandlearntesting",
+  "dependencies": {
+    "async": "~0.9.0",
+    "chai": "~2.2.0",
+    "mocha": "~2.2.1",
+    "mocha-clean": "~0.4.0",
+    "sinon": "~1.14.1",
+    "supertest": "~0.15.0"
+  }
+}
