@@ -7,7 +7,7 @@ var express      = require('express');
 var winston      = require('winston');
 var util         = require('util');
 var config       = require('./config');
-var errors       = require(__base + 'errors');
+var errors       = require(__base + 'lib/errors');
 var app          = express();
 
 app.port         = process.env.PORT || 8080;
@@ -142,7 +142,7 @@ AppManager.prototype.start = function () {
     async.series([
         function (callback) {
             // Set up routes
-            require(__base + 'index')(app);
+            require(__base + 'lib/index')(app);
             callback();
         }
     ], function (err) {

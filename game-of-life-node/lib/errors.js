@@ -1,6 +1,6 @@
 var util = require('util');
 var pluralize = require('pluralize');
-var config = require(__base + 'config');
+var config = require(__base + 'lib/config');
 
 var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
 var ARGUMENT_NAMES = /([^\s,]+)/g;

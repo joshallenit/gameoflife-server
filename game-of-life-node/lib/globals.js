@@ -3,4 +3,4 @@
  */
 
 // Global base for requires
-global.__base = __dirname + '/';
+global.__base = __dirname + '/../';

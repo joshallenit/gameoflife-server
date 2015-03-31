@@ -4,7 +4,7 @@
   "description": "TDD Demo featuring Conway's Game of Life",
   "main": "lib/index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node lib/app_startup.js",
     "test": "mocha --require mocha-clean test/"
   },
   "repository": {

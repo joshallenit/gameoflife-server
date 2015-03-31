@@ -9,10 +9,6 @@
         var width = 320;
         var height = 320;
         $(document).ready(function() {
-            console.log('sure');
-            // So here I make the Ajax request and draw the implementation... I am going to want an implementation...
-            // So I'm going to need an entry screen
-            // Start... submit
             var grid = [
                 [0, 0, 0, 0, 0, 1, 0],
                 [0, 0, 0, 0, 0, 1, 0],
@@ -22,18 +18,24 @@
                 [0, 0, 0, 0, 0, 1, 0],
                 [0, 0, 0, 0, 0, 1, 0]
             ];
+            display(grid);
+        });
+
+        var display = function(grid) {
+            // So here I make the Ajax request and draw the implementation... I am going to want an implementation...
+            // So I'm going to need an entry screen
+            // Start... submit
+
             var paper = Raphael(0, 0, width, height);
 
             var cellWidth = width / grid.length;
             var cellHeight = height / grid.length;
 
-            $.each(grid, function(x, row) {
-                console.log(arguments);
-                $.each(row, function(y, alive) {
-                    console.log(arguments);
+            $.each(grid, function(y, row) {
+                $.each(row, function(x, alive) {
                     // Creates circle at x = 50, y = 40, with radius 10
 
-                    var circle = paper.circle(y * cellHeight + (cellHeight/2), x * cellWidth + (cellWidth/2), Math.min(cellHeight/2, cellWidth/2));
+                    var circle = paper.circle(x * cellWidth + (cellWidth/2), y * cellHeight + (cellHeight/2), Math.min(cellHeight/2, cellWidth/2));
                     if (alive) {
                         // Sets the fill attribute of the circle to red (#f00)
                         circle.attr("fill", "#f00");
@@ -44,11 +46,29 @@
                     circle.attr("stroke", "#fff");
                 });
             });
-        });
+            setTimeout(function() {
+                iterate(grid);
+            }, 500);
+        }
 
-        var iterate = function() {
-            //
+        var iterate = function (grid) {
+            console.log('iterating grid', grid);
+            var gridParam = JSON.stringify(grid);
+            $.ajax({
+                url: '/life/iterate?grid=' + encodeURIComponent(gridParam)
+            })
+                    .done(function (data) {
+                        display(data);
+                    })
+                    .fail(function () {
+                        console.log('Could not get new grid', arguments);
+                        alert("$.get failed!" + JSON.stringify(arguments));
+                    });
         };
+        // Okay so now I am going to want to check many different apps.. so we are going to have to download all of
+        // the people's branches... checkout and run... and then connect to all of their apps and display them on one
+        // screen, probably easier if I have the one app do it.. so I'll have /machine/iterate machine=xxx, because then
+        // i don't have to worry about it
     </script>
 </head>
 <body>
