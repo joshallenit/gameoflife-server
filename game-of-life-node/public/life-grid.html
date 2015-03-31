@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <script src="javascripts/jquery-1.11.2.min.js"></script>
+    <script src="javascripts/raphael-min.js"></script>
+    <script>
+        var width = 320;
+        var height = 320;
+        $(document).ready(function() {
+            console.log('sure');
+            // So here I make the Ajax request and draw the implementation... I am going to want an implementation...
+            // So I'm going to need an entry screen
+            // Start... submit
+            var grid = [
+                [0, 0, 0, 0, 0, 1, 0],
+                [0, 0, 0, 0, 0, 1, 0],
+                [0, 0, 0, 0, 0, 1, 0],
+                [0, 0, 0, 0, 0, 1, 0],
+                [0, 1, 0, 0, 0, 1, 0],
+                [0, 0, 0, 0, 0, 1, 0],
+                [0, 0, 0, 0, 0, 1, 0]
+            ];
+            var paper = Raphael(0, 0, width, height);
+
+            var cellWidth = width / grid.length;
+            var cellHeight = height / grid.length;
+
+            $.each(grid, function(x, row) {
+                console.log(arguments);
+                $.each(row, function(y, alive) {
+                    console.log(arguments);
+                    // Creates circle at x = 50, y = 40, with radius 10
+
+                    var circle = paper.circle(y * cellHeight + (cellHeight/2), x * cellWidth + (cellWidth/2), Math.min(cellHeight/2, cellWidth/2));
+                    if (alive) {
+                        // Sets the fill attribute of the circle to red (#f00)
+                        circle.attr("fill", "#f00");
+                    } else {
+                        circle.attr("fill", "#eeeeee");
+                    }
+                    // Sets the stroke attribute of the circle to white
+                    circle.attr("stroke", "#fff");
+                });
+            });
+        });
+
+        var iterate = function() {
+            //
+        };
+    </script>
+</head>
+<body>
+<!-- Okay, so from here I am going to have to connect using ajax to get the next iteration -->
+
+</body>
+</html>

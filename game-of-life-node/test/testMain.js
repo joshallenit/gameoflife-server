@@ -3,9 +3,14 @@ require('../lib/globals');
 process.env.PORT = '8001'
 process.env.NODE_ENV = 'test'
 
-//var AppManager = require(__base + 'app_manager');
-//var appManager = new AppManager();
-//exports.app = appManager.expressApp;
+var AppManager = require(__base + 'app_manager');
+var appManager = new AppManager();
+exports.app = appManager.expressApp;
+
+before(function (done) {
+    appManager.once('appStarted', done);
+    appManager.start();
+});
 
 var request     = require('supertest');
 var async       = require('async');
