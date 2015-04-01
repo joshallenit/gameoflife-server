@@ -70,7 +70,13 @@ git.cloneAll(function(err) {
         throw err;
     }
     console.log('Cloned all');
+    displayMachines();
 });
+
+var displayMachines = function() {
+    console.log('Machines', git.machines);
+    setTimeout(displayMachines, 2000);
+}
 
 module.exports = function (app) {
     app.get('/life/iterate', function (req, res) {

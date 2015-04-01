@@ -4,8 +4,13 @@ var util = require('util');
 var async = require('async');
 var _ = require('underscore');
 var errors = require(__base + 'lib/errors');
+var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
+var objects = require(__base + 'lib/object_lib');
 
 var nodeEntryRepo = 'https://github.com/joshallenit/lunchandlearn-tdd-entry-node.git';
+
+exports.machines = {};
 
 /**
  List branches
@@ -45,7 +50,6 @@ exports.cloneAll = function (done) {
             },
             function (callback) {
                 console.log('finding branches');
-                var exec = require('child_process').exec;
                 exec('git branch -r', {cwd: 'nodeEntryRepo_master'}, function (error, stdout, stderr) {
                     if (error || stderr) {
                         return callback(errors.toErrorObject('Could not find branches', error || stderr));
@@ -59,6 +63,7 @@ exports.cloneAll = function (done) {
             },
             function (callback) {
                 console.log('checking out branches');
+                var port = 3000;
                 var checkoutFunctions = [];
                 _.each(branches, function (branch) {
                     if (!/entry/i.test(branch)) {
@@ -66,7 +71,7 @@ exports.cloneAll = function (done) {
                         return;
                     }
                     checkoutFunctions.push(function (checkoutCallback) {
-                        cloneAndCheckout(nodeEntryRepo, 'node', branch, checkoutCallback);
+                        cloneAndCheckout(nodeEntryRepo, 'node', branch, port++, checkoutCallback);
                     })
                 });
                 async.parallel(checkoutFunctions, callback);
@@ -75,7 +80,7 @@ exports.cloneAll = function (done) {
         done);
 };
 
-var cloneAndCheckout = function (url, prefix, branch, done) {
+var cloneAndCheckout = function (url, prefix, branch, port, done) {
     var dir = __base + prefix + '_clones/' + branch;
     async.series([
             function (callback) {
@@ -106,7 +111,50 @@ var cloneAndCheckout = function (url, prefix, branch, done) {
                     .catch(callback);
             },
             function (callback) {
-                console.log('RUNNING NODE');
+                console.log('installing', branch, 'in', dir);
+                exports.machines[branch] =
+                {
+                    status: 'installing',
+                    stdout: '',
+                    stderr: ''
+                };
+                exec('npm install', {cwd: dir}, function (error, stdout, stderr) {
+                    console.log('done running install for', branch, 'in', dir, arguments);
+                    if (error || stderr) {
+                        return callback(errors.toErrorObject('Could not find branches', error || stderr));
+                    }
+                    exports.machines[branch].status += ', installed';
+                    callback();
+                });
+            },
+            function (callback) {
+                console.log('RUNNING NODE npm start in ', dir);
+                try {
+                    var env = {};
+                    objects.copyFields(process.env, env)
+                    env.PORT = port;
+                    var npm = spawn('npm', ['start'], {cwd: dir, env: env});
+                    exports.machines[branch].status += ', starting';
+                    exports.machines[branch].process = npm;
+                    npm.stderr.on('data', function (data) {
+                        exports.machines[branch].status += ', error';
+                        exports.machines[branch].stderr += data;
+                    });
+                    npm.stdout.on('data', function (data) {
+                        if (!/error/.test(exports.machines[branch].status)) {
+                            exports.machines[branch].status += ', started';
+                        }
+                        exports.machines[branch].stdout += data;
+                    });
+                    npm.on('close', function (/*code, signal*/) {
+                        exports.machines[branch].status += ', closed' + util.inspect(arguments);
+                    });
+                    npm.on('error', function (/*code, signal*/) {
+                        exports.machines[branch].status += ', error' + util.inspect(arguments);
+                    });
+                } catch (ex) {
+                    exports.machines[branch].status += ', error '+util.inspect(ex);
+                }
                 callback();
             }
         ],

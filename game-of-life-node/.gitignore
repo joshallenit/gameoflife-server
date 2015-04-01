@@ -1,4 +1,5 @@
 node_modules
+node_clones
 
 **/.idea/workspace.xml
 **/.idea/dictionaries
@@ -9,5 +10,5 @@ coverage
 
 templates/**/*.html
 
-**/*.log*
+**/*.log
 **/*.swp
