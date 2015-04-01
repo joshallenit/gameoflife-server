@@ -12,3 +12,5 @@ templates/**/*.html
 
 **/*.log
 **/*.swp
+
+.idea/workspace.xml
