@@ -1,4 +1,14 @@
+node_modules
+node_clones
 
-game-of-life-node/node_clones/entryFast/
+**/.idea/workspace.xml
+**/.idea/dictionaries
 
-npm-debug.log
+.elasticbeanstalk/
+
+coverage
+
+templates/**/*.html
+
+**/*.log
+**/*.swp
