@@ -63,6 +63,15 @@ var iterate = function (grid) {
     return next;
 };
 
+var git = require(__base + 'lib/gitCloneBranches');
+git.cloneAll(function(err) {
+    console.log('done cloned all', arguments);
+    if (err) {
+        throw err;
+    }
+    console.log('Cloned all');
+});
+
 module.exports = function (app) {
     app.get('/life/iterate', function (req, res) {
         var grid = JSON.parse(req.query.grid);
