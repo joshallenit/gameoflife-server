@@ -104,11 +104,22 @@
             }
             machineNumber = Math.floor(machineNumber);
             var machine = machines[machineNumber];
-            if (machine.response && machine.response[y] && machine.response[y][x]) {
-                return {color: "#f00"/*machine.machine.onColor*/, alive: 1};
+            if (!machine) {
+                console.log('machineNumber', machineNumber, 'x', x, 'y', y, machines);
+            }
+            if (machine && machine.response && machine.response[y] && machine.response[y][x]) {
+                var color = "#f00"
+                if (machine.machine && machine.machine.onColor) {
+                    color = machine.machine.onColor;
+                }
+                return {color: color, alive: 1};
             }
             else {
-                return {color: "#eeeeee" /*machine.machine.offColor*/, alive: 0};
+                var color = "#eeeeee"
+                if (machine && machine.machine && machine.machine.offColor) {
+                    color = machine.machine.offColor;
+                }
+                return {color: color, alive: 0};
             }
         }
 
@@ -177,16 +188,19 @@
                 url: '/life/iterate_machines?grid=' + encodeURIComponent(gridParam)
             })
                     .done(function (machines) {
+                        console.log('got response', machines);
                         if (!machines.length) {
                             $('#messages').text('No entry servers are available');
                         }
+                        $('#messages').text('');
+                        var workingMachines = [];
                         for (var i = machines.length-1; i >= 0; i--) {
-                            if (machines[i].error) {
-                                $('#messages').text(JSON.stringify(machines[i]));
-                                delete machines[i];
+                            if (!machines[i].error && machines[i].response) {
+                                workingMachines.push(machines[i]);
                             }
                         }
-                        display(machines);
+                        $('#messages').text($('#messages').text() + ' Working ' + workingMachines.length + ' machines');
+                        display(workingMachines);
                     })
                     .fail(function () {
                         $('#messages').text('Could not make request ' + JSON.stringify(arguments));
