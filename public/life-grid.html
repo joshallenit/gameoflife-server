@@ -6,46 +6,91 @@
     <script src="javascripts/jquery-1.11.2.min.js"></script>
     <script src="javascripts/raphael-min.js"></script>
     <script>
-        var width = 320;
-        var height = 320;
+        var width = 640;
+        var height = 480;
+
+        // We keep the grid size ourselves in case of bad responses from the server.
+        var gridWidth = 15;
+        var gridHeight = 10;
         $(document).ready(function() {
-            var grid = [
-                [0, 0, 0, 0, 0, 1, 0],
-                [0, 0, 0, 0, 0, 1, 0],
-                [0, 0, 0, 0, 0, 1, 0],
-                [0, 0, 0, 0, 0, 1, 0],
-                [0, 1, 0, 0, 0, 1, 0],
-                [0, 0, 0, 0, 0, 1, 0],
-                [0, 0, 0, 0, 0, 1, 0]
-            ];
-            display(grid);
+            var machines = [
+                {
+                    machine: {
+                        name: 'Setup',
+                        onColor:  "#f00",
+                        offColor: "#eeeeee"
+                    },
+                    response: [
+                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+                }
+            ]
+            display(machines);
         });
 
-        var display = function(grid) {
-            // So here I make the Ajax request and draw the implementation... I am going to want an implementation...
-            // So I'm going to need an entry screen
-            // Start... submit
+        var getCellInfo = function (machines, x, y) {
+            var machineNumber;
+            if (numBottomParts(machines.length) == 0) {
+                machineNumber = x / (gridWidth / numTopParts(machines.length));
+            }
+            else {
+                if (y < gridHeight / 2) {
+                    machineNumber = x / (gridWidth/ numTopParts(machines.length));
+                }
+                else {
+                    machineNumber = x / (gridWidth / numBottomParts(machines.length)) + numTopParts(machines.length);
+                }
+            }
+            machineNumber = Math.floor(machineNumber);
+            var machine = machines[machineNumber];
+            if (machine.response && machine.response[y] && machine.response[y][x]) {
+                return {color: machine.machine.onColor, alive: 1};
+            }
+            else {
+                return {color: machine.machine.offColor, alive: 0};
+            }
+        }
 
+        var numTopParts = function(numMachines) {
+            if (numMachines == 2) {
+                return 2;
+            }
+            return Math.ceil(numMachines / 2);
+        }
+
+        var numBottomParts = function(numMachines) {
+            if (numMachines == 2) {
+                return 0;
+            }
+            return Math.floor(numMachines / 2);
+        }
+
+        var display = function(machines) {
             var paper = Raphael(0, 0, width, height);
 
-            var cellWidth = width / grid.length;
-            var cellHeight = height / grid.length;
+            var cellWidth = width / gridWidth;
+            var cellHeight = height / gridHeight;
 
-            $.each(grid, function(y, row) {
-                $.each(row, function(x, alive) {
-                    // Creates circle at x = 50, y = 40, with radius 10
-
+            var grid = [];
+            for (var y = 0; y < gridHeight; y++) {
+                grid.push([])
+                for (var x = 0; x < gridWidth; x++) {
                     var circle = paper.circle(x * cellWidth + (cellWidth/2), y * cellHeight + (cellHeight/2), Math.min(cellHeight/2, cellWidth/2));
-                    if (alive) {
-                        // Sets the fill attribute of the circle to red (#f00)
-                        circle.attr("fill", "#f00");
-                    } else {
-                        circle.attr("fill", "#eeeeee");
-                    }
+                    var info = getCellInfo(machines, x, y);
+                    circle.attr("fill", info.color);
                     // Sets the stroke attribute of the circle to white
                     circle.attr("stroke", "#fff");
-                });
-            });
+                    grid[y].push(info.alive);
+                }
+            }
             setTimeout(function() {
                 iterate(grid);
             }, 500);
@@ -55,9 +100,10 @@
             console.log('iterating grid', grid);
             var gridParam = JSON.stringify(grid);
             $.ajax({
-                url: '/life/iterate?grid=' + encodeURIComponent(gridParam)
+                url: '/life/iterate_machines?grid=' + encodeURIComponent(gridParam)
             })
                     .done(function (data) {
+                        console.log('Got data back from server', data);
                         display(data);
                     })
                     .fail(function () {
@@ -65,14 +111,9 @@
                         alert("$.get failed!" + JSON.stringify(arguments));
                     });
         };
-        // Okay so now I am going to want to check many different apps.. so we are going to have to download all of
-        // the people's branches... checkout and run... and then connect to all of their apps and display them on one
-        // screen, probably easier if I have the one app do it.. so I'll have /machine/iterate machine=xxx, because then
-        // i don't have to worry about it
     </script>
 </head>
 <body>
-<!-- Okay, so from here I am going to have to connect using ajax to get the next iteration -->
 
 </body>
 </html>
