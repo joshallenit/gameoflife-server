@@ -127,9 +127,6 @@
         }
 
         var display = function (machines) {
-
-            // So here I want to create them to begin with...
-
             if ((cells.length + borderSize*2) != gridHeight || (cells[0] && (cells[0].length + borderSize*2) != gridWidth)) {
                 populateCells();
             }
@@ -152,7 +149,7 @@
             }
             setTimeout(function () {
                 iterate(grid);
-            }, 100);
+            }, 200);
         }
 
         /**
@@ -179,18 +176,26 @@
             $.ajax({
                 url: '/life/iterate_machines?grid=' + encodeURIComponent(gridParam)
             })
-                    .done(function (data) {
-                        console.log('Got data back from server', data);
-                        display(data);
+                    .done(function (machines) {
+                        if (!machines.length) {
+                            $('#messages').text('No entry servers are available');
+                        }
+                        for (var i = machines.length-1; i >= 0; i--) {
+                            if (machines[i].error) {
+                                $('#messages').text(JSON.stringify(machines[i]));
+                                delete machines[i];
+                            }
+                        }
+                        display(machines);
                     })
                     .fail(function () {
+                        $('#messages').text('Could not make request ' + JSON.stringify(arguments));
                         console.log('Could not get new grid', arguments);
-                        alert("$.get failed!" + JSON.stringify(arguments));
                     });
         };
     </script>
 </head>
 <body>
-
+    <div id="messages" style="float: right; width: 200px;"></div>
 </body>
 </html>
