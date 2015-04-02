@@ -6,35 +6,88 @@
     <script src="javascripts/jquery-1.11.2.min.js"></script>
     <script src="javascripts/raphael-min.js"></script>
     <script>
-        var width = 640;
-        var height = 480;
+        // We do not show five boxes along all the edges so that it looks like an infinite grid with objects going out
+        // of view.
+        var borderSize = 10;
+        var presetResponses = [
+            // Glider gun.
+            [
+               //1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8  9  0  1  2  3  4  5  6  7  8       
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0],
+                [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ],
+            [
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ]
+        ];
+
+        var cells = [];
+
+        var width = 800;
+        var height = 600;
 
         // We keep the grid size ourselves in case of bad responses from the server.
-        var gridWidth = 15;
-        var gridHeight = 10;
-        $(document).ready(function() {
+        var gridWidth;
+        var gridHeight;
+        $(document).ready(function () {
             var machines = [
                 {
                     machine: {
                         name: 'Setup',
-                        onColor:  "#f00",
+                        onColor: "#f00",
                         offColor: "#eeeeee"
                     },
-                    response: [
-                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                        [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+                    response: presetResponses[Math.floor(Math.random() * presetResponses.length)]
                 }
             ]
+            console.log('ADDING BORDER', machines[0].response)
+            gridWidth = machines[0].response[0].length;
+            gridHeight = machines[0].response.length;
+            addBorder(machines[0].response);
+            console.log('ADDED', machines[0].response)
+            gridWidth = machines[0].response[0].length;
+            gridHeight = machines[0].response.length;
             display(machines);
         });
+
+        var addBorder = function(grid) {
+            // Top and bottom
+            for (var i = 0; i < borderSize; i++) {
+                grid.unshift([]);
+                for (var j = 0; j < gridWidth; j++) {
+                    grid[0].push(0);
+                }
+                grid.push([]);
+                for (var j = 0; j < gridWidth; j++) {
+                    grid[grid.length-1].push(0);
+                }
+            }
+            // Left and right
+            for (var i = 0; i < grid.length; i++) {
+                for (var j = 0; j < borderSize; j++) {
+                    grid[i].unshift(0);
+                    grid[i].push(0);
+                }
+            }
+        }
 
         var getCellInfo = function (machines, x, y) {
             var machineNumber;
@@ -43,7 +96,7 @@
             }
             else {
                 if (y < gridHeight / 2) {
-                    machineNumber = x / (gridWidth/ numTopParts(machines.length));
+                    machineNumber = x / (gridWidth / numTopParts(machines.length));
                 }
                 else {
                     machineNumber = x / (gridWidth / numBottomParts(machines.length)) + numTopParts(machines.length);
@@ -52,48 +105,72 @@
             machineNumber = Math.floor(machineNumber);
             var machine = machines[machineNumber];
             if (machine.response && machine.response[y] && machine.response[y][x]) {
-                return {color: machine.machine.onColor, alive: 1};
+                return {color: "#f00"/*machine.machine.onColor*/, alive: 1};
             }
             else {
-                return {color: machine.machine.offColor, alive: 0};
+                return {color: "#eeeeee" /*machine.machine.offColor*/, alive: 0};
             }
         }
 
-        var numTopParts = function(numMachines) {
+        var numTopParts = function (numMachines) {
             if (numMachines == 2) {
                 return 2;
             }
             return Math.ceil(numMachines / 2);
         }
 
-        var numBottomParts = function(numMachines) {
+        var numBottomParts = function (numMachines) {
             if (numMachines == 2) {
                 return 0;
             }
             return Math.floor(numMachines / 2);
         }
 
-        var display = function(machines) {
-            var paper = Raphael(0, 0, width, height);
+        var display = function (machines) {
 
-            var cellWidth = width / gridWidth;
-            var cellHeight = height / gridHeight;
+            // So here I want to create them to begin with...
+
+            if ((cells.length + borderSize*2) != gridHeight || (cells[0] && (cells[0].length + borderSize*2) != gridWidth)) {
+                populateCells();
+            }
 
             var grid = [];
             for (var y = 0; y < gridHeight; y++) {
                 grid.push([])
                 for (var x = 0; x < gridWidth; x++) {
-                    var circle = paper.circle(x * cellWidth + (cellWidth/2), y * cellHeight + (cellHeight/2), Math.min(cellHeight/2, cellWidth/2));
                     var info = getCellInfo(machines, x, y);
-                    circle.attr("fill", info.color);
-                    // Sets the stroke attribute of the circle to white
-                    circle.attr("stroke", "#fff");
+                    if (x >= borderSize && x < gridWidth - borderSize && y >= borderSize && y < gridHeight - borderSize) {
+                        var locationX = x - borderSize;
+                        var locationY = y - borderSize;
+                        var circle = cells[locationY][locationX];
+                        circle.attr("fill", info.color);
+                        // Sets the stroke attribute of the circle to white
+                        circle.attr("stroke", "#fff");
+                    }
                     grid[y].push(info.alive);
                 }
             }
-            setTimeout(function() {
+            setTimeout(function () {
                 iterate(grid);
-            }, 500);
+            }, 100);
+        }
+
+        /**
+         * Only create the circles once as otherwise thousands of svg elements will be created slowing the page down.
+         */
+        var populateCells = function () {
+            console.log('Creating cells');
+            cells = [];
+            var cellWidth = width / (gridWidth - borderSize * 2);
+            var cellHeight = height / (gridHeight - borderSize * 2);
+            var paper = Raphael(0, 0, width, height);
+            for (var y = 0; y < gridHeight - borderSize * 2; y++) {
+                cells.push([]);
+                for (var x = 0; x < gridWidth - borderSize * 2; x++) {
+                    var circle = paper.circle(x * cellWidth + (cellWidth / 2), y * cellHeight + (cellHeight / 2), Math.min(cellHeight / 2, cellWidth / 2));
+                    cells[y].push(circle);
+                }
+            }
         }
 
         var iterate = function (grid) {
