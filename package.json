@@ -20,6 +20,7 @@
     "express": "^4.12.3",
     "inflight": "^1.0.4",
     "inherits": "^2.0.1",
+    "ipware": "0.0.5",
     "minimatch": "^2.0.4",
     "mocha": "~2.2.1",
     "mocha-clean": "^0.4.0",
